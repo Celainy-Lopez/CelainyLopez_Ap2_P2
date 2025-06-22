@@ -6,7 +6,5 @@ import javax.inject.Inject
 class RemoteDataSource @Inject constructor(
     private val gitHubApi: GitHubApi
 ) {
-    suspend fun getRepositories(username: String): List<RepositoryDto> {
-        return gitHubApi.listRepos(username)
-        }
+    suspend fun getRepositories(username: String) = gitHubApi.listRepos(username)
 }
