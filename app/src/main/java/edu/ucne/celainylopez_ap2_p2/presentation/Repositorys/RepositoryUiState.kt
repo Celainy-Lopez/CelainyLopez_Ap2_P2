@@ -7,5 +7,6 @@ data class RepositoryUiState (
     val descripcion: String = "",
     val html_url: String = "",
     val isLoading: Boolean = false,
-    val repository: List<RepositoryDto> = emptyList()
+    val repository: List<RepositoryDto> = emptyList(),
+    val errorMessage: String = ""
 )

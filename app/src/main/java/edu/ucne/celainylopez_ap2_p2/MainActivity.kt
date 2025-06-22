@@ -24,7 +24,6 @@ class MainActivity : ComponentActivity() {
                 RepositoryListScreen(
                     drawerState = drawerState,
                     scope = scope
-
                 )
             }
         }
