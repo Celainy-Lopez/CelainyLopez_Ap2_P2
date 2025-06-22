@@ -10,7 +10,7 @@ import javax.inject.Inject
 class RepositoryRepository @Inject constructor(
     private val remoteDataSource: RemoteDataSource
 ) {
-    suspend fun getRepositories(username: String): Flow<Resource<List<RepositoryDto>>> = flow {
+     fun getRepositories(username: String): Flow<Resource<List<RepositoryDto>>> = flow {
         emit(Resource.Loading())
         try {
             val repositories = remoteDataSource.getRepositories(username)
