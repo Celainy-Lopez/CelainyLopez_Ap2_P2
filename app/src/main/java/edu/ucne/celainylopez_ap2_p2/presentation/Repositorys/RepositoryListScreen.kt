@@ -133,6 +133,7 @@ fun RepositoryListBodyScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Refresh,
+                            tint = Color.White ,
                             contentDescription = "Actualizar"
                         )
                     }
