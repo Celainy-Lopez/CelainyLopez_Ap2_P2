@@ -8,6 +8,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.celainylopez_ap2_p2.data.remote.dto.RepositoryDto
 import edu.ucne.celainylopez_ap2_p2.ui.theme.CelainyLopez_Ap2_P2Theme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -36,18 +38,23 @@ import kotlinx.coroutines.launch
 @Composable
 fun RepositoryListScreen(
     viewModel: RepositoryViewModel = hiltViewModel(),
-    // createRepository: () -> Unit
-    //goToSistema: (Int) -> Unit,
+    createRepository: () -> Unit,
+    goToRepository: (String) -> Unit,
     drawerState: DrawerState,
     scope: CoroutineScope,
     //goBack: () -> Unit
+    deleteRepository: ((RepositoryDto) -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var lastRetentionCount by remember { mutableStateOf(0) }
 
+    val query by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
-        viewModel.getRepositories("enelramon")
+        delay(190000)
+        viewModel.onEvent(RepositoryEvent.GetRepositories)
     }
 
     LaunchedEffect(uiState.repository) {
@@ -63,13 +70,17 @@ fun RepositoryListScreen(
 
     RepositoryListBodyScreen(
         uiState = uiState,
-        //goToRepository = { id -> goToRepository(id) },
-        // createRepository = createRepository
+        goToRepository = { string -> goToRepository(string) },
+        createRepository = createRepository,
         //onEvent = viewModel::onEvent,
         drawerState = drawerState,
         scope = scope,
-        reloadRepository = { viewModel.getRepositories("enelramon") },
+        reloadRepository = { viewModel.onEvent(RepositoryEvent.GetRepositories) },
         //goBack = goBack
+        deleteRepository = deleteRepository,
+        query = query,
+        searchResults = searchResults,
+        onSearchQueryChanged = viewModel::onSearchQueryChanged
     )
 }
 
@@ -77,13 +88,17 @@ fun RepositoryListScreen(
 @Composable
 fun RepositoryListBodyScreen(
     uiState: RepositoryUiState,
-    //goToRepository: (Int) -> Unit,
-    //createRepository: () -> Unit,
+    goToRepository: (String) -> Unit,
+    createRepository: () -> Unit,
     //onEvent: (RepositoryEvent) -> Unit,
     drawerState: DrawerState,
     scope: CoroutineScope,
     reloadRepository: () -> Unit,
     //goBack: () -> Unit
+    deleteRepository: ((RepositoryDto) -> Unit)? = null,
+    query: String,
+    searchResults: List<RepositoryDto>,
+    onSearchQueryChanged: (String) -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
@@ -102,18 +117,31 @@ fun RepositoryListBodyScreen(
                         ),
                     )
                 },
+
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+
+                actions = {
+                    IconButton(
+                        onClick = reloadRepository,
+                        enabled = !uiState.isLoading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Actualizar"
+                        )
+                    }
+                }
             )
         },
 
         floatingActionButton = {
-            FloatingActionButton(onClick = {}) {
+            FloatingActionButton(onClick = { createRepository }) {
                 Icon(Icons.Filled.Add, "Agregar")
             }
         }
@@ -124,48 +152,64 @@ fun RepositoryListBodyScreen(
                 .pullRefresh(pullRefreshState)
                 .padding(innerPadding)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-            }
-
-            if (uiState.repository.isEmpty() && !uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No hay repositorios registrados",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Gray
+            when {
+                uiState.isLoading && uiState.repository.isEmpty() -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                ) {
-                    items(uiState.repository) { repository ->
-                        RepositoryRow(repository)
-                        Spacer(modifier = Modifier.height(8.dp))
+
+                uiState.repository.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No se encontraron repositorios",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item {
+                            SearchBar(
+                                query = query,
+                                onQueryChanged = onSearchQueryChanged,
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        val reposToShow =
+                            if (query.isNotBlank()) searchResults else uiState.repository
+
+                        items(reposToShow) { repository ->
+                            RepositoryRow(
+                                repository = repository,
+                                goToRepository = { goToRepository(repository.name) },
+                                deleteRepository = deleteRepository
+                            )
+                        }
                     }
                 }
             }
 
             if (!uiState.errorMessage.isNullOrEmpty()) {
-                Row(
+                Box(
                     modifier = Modifier
+                        .align(Alignment.Center)
                         .padding(16.dp)
                 ) {
                     Text(
                         text = uiState.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -182,7 +226,11 @@ fun RepositoryListBodyScreen(
 
 
 @Composable
-fun RepositoryRow(repository: RepositoryDto) {
+fun RepositoryRow(
+    repository: RepositoryDto,
+    goToRepository: () -> Unit,
+    deleteRepository: ((RepositoryDto)->Unit)?
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,6 +264,23 @@ fun RepositoryRow(repository: RepositoryDto) {
         }
     }
     HorizontalDivider()
+}
+
+
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChanged: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChanged,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        label = { Text("Buscar Repositorio...") },
+        singleLine = true
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)
