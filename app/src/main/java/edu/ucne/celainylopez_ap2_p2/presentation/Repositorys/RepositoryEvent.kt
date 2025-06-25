@@ -6,7 +6,7 @@ sealed interface RepositoryEvent {
 
     data object PostRepository: RepositoryEvent
 
-    data object PutRepositories: RepositoryEvent
+    data object PutRepository: RepositoryEvent
 
-    data  object DeleteRepositories: RepositoryEvent
+    data  object DeleteRepository: RepositoryEvent
 }
