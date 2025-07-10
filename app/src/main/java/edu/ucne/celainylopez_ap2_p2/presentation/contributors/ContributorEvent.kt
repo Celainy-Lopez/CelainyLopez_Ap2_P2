@@ -1,4 +1,6 @@
 package edu.ucne.celainylopez_ap2_p2.presentation.contributors
 
-class ContributorEvent {
+
+sealed interface ContributorEvent {
+    data class GetContributors(val repoPath: String) : ContributorEvent
 }
