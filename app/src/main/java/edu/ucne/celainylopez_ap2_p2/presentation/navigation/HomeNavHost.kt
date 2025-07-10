@@ -7,7 +7,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import edu.ucne.celainylopez_ap2_p2.presentation.Repositorys.RepositoryListScreen
+import edu.ucne.celainylopez_ap2_p2.presentation.repositories.RepositoryListScreen
 
 @Composable
 fun HomeNavHost(

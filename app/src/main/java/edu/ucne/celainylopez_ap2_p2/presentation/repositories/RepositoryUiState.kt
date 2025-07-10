@@ -1,4 +1,4 @@
-package edu.ucne.celainylopez_ap2_p2.presentation.Repositorys
+package edu.ucne.celainylopez_ap2_p2.presentation.repositories
 
 import edu.ucne.celainylopez_ap2_p2.data.remote.dto.RepositoryDto
 
