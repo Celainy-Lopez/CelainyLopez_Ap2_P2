@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.material3)
     implementation (libs.androidx.material)
     implementation(libs.androidx.material.v131) // Usa la última versión
+    implementation(libs.coil.compose)
 
 
 

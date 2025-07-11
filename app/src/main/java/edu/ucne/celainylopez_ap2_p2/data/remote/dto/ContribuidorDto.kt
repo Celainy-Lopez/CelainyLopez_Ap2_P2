@@ -6,5 +6,6 @@ data class ContribuidorDto (
     @Json(name = "login") val login: String,
     @Json(name = "id") val id: Int,
     @Json(name = "contributions") val contributions: Int,
-    @Json(name = "type") val type: String
+    @Json(name = "type") val type: String,
+    @Json(name = "avatar_url") val avatar_url: String
 )

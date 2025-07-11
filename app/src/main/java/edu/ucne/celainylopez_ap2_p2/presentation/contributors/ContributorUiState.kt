@@ -7,6 +7,7 @@ data class ContributorUiState(
     val id: Int = 0,
     val contribution: Int = 0,
     val type: String = "",
+    val avatar_url: String = "",
     val isLoading: Boolean = false,
     val contributor: List<ContribuidorDto> = emptyList(),
     val errorMessage: String? = null,

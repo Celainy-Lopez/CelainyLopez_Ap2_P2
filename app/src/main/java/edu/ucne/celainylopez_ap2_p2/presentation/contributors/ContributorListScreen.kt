@@ -1,5 +1,6 @@
 package edu.ucne.celainylopez_ap2_p2.presentation.contributors
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,8 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,10 +37,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import edu.ucne.celainylopez_ap2_p2.data.remote.dto.ContribuidorDto
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -185,32 +190,60 @@ fun ContributorRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 4.dp),
         elevation = cardElevation(6.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .padding(16.dp)
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row {
-                Text(text = contributor.login, fontWeight = FontWeight.ExtraBold)
+            AsyncImage(
+                model = contributor.avatar_url,
+                contentDescription = "Avatar",
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            )
+
+            Spacer(modifier = Modifier.size(12.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = contributor.login,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+
+                Row {
+                    Text(
+                        text = "Contribuciones: ",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Text(
+                        text = contributor.contributions.toString(),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Row {
+                    Text(
+                        text = "Tipo: ",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Text(
+                        text = contributor.type,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.weight(2f))
-
-            Row {
-                Text(text = "Contribuciones: ", fontWeight = FontWeight.Bold)
-                Text(text = contributor.contributions.toString())
-            }
-
-            Row {
-                Text(text = "type: ", fontWeight = FontWeight.Bold)
-                Text(text = contributor.type)
-            }
-
-
         }
     }
-    HorizontalDivider()
+
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
 }
 
