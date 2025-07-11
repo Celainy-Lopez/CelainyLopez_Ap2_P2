@@ -38,7 +38,9 @@ fun RepositoryListScreen(
     drawerState: DrawerState,
     scope: CoroutineScope,
     //goBack: () -> Unit
-    deleteRepository: ((RepositoryDto) -> Unit)? = null
+    deleteRepository: ((RepositoryDto) -> Unit)? = null,
+    goToContributors: (String, String) -> Unit
+
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -75,7 +77,8 @@ fun RepositoryListScreen(
         deleteRepository = deleteRepository,
         query = query,
         searchResults = searchResults,
-        onSearchQueryChanged = viewModel::onSearchQueryChanged
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        goToContributors = goToContributors
     )
 }
 
@@ -93,7 +96,8 @@ fun RepositoryListBodyScreen(
     deleteRepository: ((RepositoryDto) -> Unit)? = null,
     query: String,
     searchResults: List<RepositoryDto>,
-    onSearchQueryChanged: (String) -> Unit
+    onSearchQueryChanged: (String) -> Unit,
+    goToContributors: (String, String) -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
@@ -128,7 +132,7 @@ fun RepositoryListBodyScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Refresh,
-                            tint = Color.White ,
+                            tint = Color.White,
                             contentDescription = "Actualizar"
                         )
                     }
@@ -190,8 +194,10 @@ fun RepositoryListBodyScreen(
                             RepositoryRow(
                                 repository = repository,
                                 goToRepository = { goToRepository(repository.name) },
-                                deleteRepository = deleteRepository
+                                deleteRepository = deleteRepository,
+                                { goToContributors("enelramon", repository.name) }
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }
@@ -225,7 +231,8 @@ fun RepositoryListBodyScreen(
 fun RepositoryRow(
     repository: RepositoryDto,
     goToRepository: () -> Unit,
-    deleteRepository: ((RepositoryDto)->Unit)?
+    deleteRepository: ((RepositoryDto) -> Unit)?,
+    onViewContributors: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -256,6 +263,17 @@ fun RepositoryRow(
             Row {
                 Text(text = "Html URL: ", fontWeight = FontWeight.ExtraBold)
                 Text(text = repository.htmlUrl ?: "No Disponible")
+            }
+
+            TextButton(
+                onClick = onViewContributors,
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Text(
+                    text = "Ver Colaboradores",
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
         }
     }
