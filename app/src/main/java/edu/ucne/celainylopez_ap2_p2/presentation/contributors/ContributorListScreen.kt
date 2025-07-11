@@ -200,8 +200,14 @@ fun ContributorRow(
 
             Row {
                 Text(text = "Contribuciones: ", fontWeight = FontWeight.Bold)
-                Text(text = "${contributor.contributions}")
+                Text(text = contributor.contributions.toString())
             }
+
+            Row {
+                Text(text = "type: ", fontWeight = FontWeight.Bold)
+                Text(text = contributor.type)
+            }
+
 
         }
     }
